@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='utf-8'?>
+<objectModel 
+ xmlns='http://standards.ieee.org/IEEE1516-2010'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://standards.ieee.org/IEEE1516-2010 http://standards.ieee.org/downloads/1516/1516.2-2010/IEEE1516-DIF-2010.xsd'  >
+	<modelIdentification>
+		<name>BPMNSimulation</name>
+		<type>FOM</type>
+		<version>1.0</version>
+	</modelIdentification>
+	<objects>
+		<objectClass>
+			<name>HLAobjectRoot</name>
+		</objectClass>
+	</objects>
+	<interactions>
+		<interactionClass>
+			<name>HLAinteractionRoot</name>
+			<interactionClass>
+				<name>FederationJoined</name>
+				<sharing>PublishSubscribe</sharing>
+				<transportation>HLAbestEffort</transportation>
+				<order>TimeStamp</order>
+				<semantics>This interaction is sent when a federate joins the federation execution. For synchronization purposes</semantics>
+			</interactionClass>
+			<interactionClass>
+				<name>IncomingToken</name>
+				<sharing>PublishSubscribe</sharing>
+				<transportation>HLAbestEffort</transportation>
+				<order>TimeStamp</order>
+				<semantics>Represents the Token, as specified in the BPMN execution semantics, which is exchanged between two flow nodes provided by two different federates</semantics>
+            	<parameter>
+					<name>tokenID</name>
+					<dataType>HLAunicodeString</dataType>
+					<semantics>Unique token identified</semantics>
+				</parameter>
+				<parameter>
+					<name>tokenTargetEntity</name>
+					<dataType>HLAunicodeString</dataType>
+					<semantics>Participant that contains the FlowNode that handles the incoming token</semantics>
+				</parameter>
+            	<parameter>
+					<name>tokenTargetNode</name>
+					<dataType>HLAunicodeString</dataType>
+					<semantics>FlowNode responsible for receiving and processing the incoming token</semantics>
+				</parameter>
+				<parameter>
+					<name>startTime</name>
+					<dataType>HLAinteger64BE</dataType>
+					<semantics>token creation time expressed in the simulation logical time</semantics>
+				</parameter>
+			</interactionClass>
+			<interactionClass>
+				<name>IncomingMessage</name>
+				<sharing>PublishSubscribe</sharing>
+				<transportation>HLAbestEffort</transportation>
+				<order>TimeStamp</order>
+				<semantics>Represents a message exchanged between two flow nodes provided by two different federates</semantics>
+				<parameter>
+					<name>messageSourceEntity</name>
+					<dataType>HLAunicodeString</dataType>
+					<semantics>Participant that contains the FlowNode that sends message</semantics>
+				</parameter>
+				<parameter>
+					<name>messageTargetEntity</name>
+					<dataType>HLAunicodeString</dataType>
+					<semantics>Participant that contains the FlowNode that receives the incoming message</semantics>
+				</parameter>
+				<parameter>
+					<name>messageTargetNode</name>
+					<dataType>HLAunicodeString</dataType>
+					<semantics>Flow Node responsible for receiving and processing the incoming message</semantics>
+				</parameter>
+				<parameter>
+					<name>message</name>
+					<dataType>HLAunicodeString</dataType>
+					<semantics>Message payload</semantics>
+				</parameter>
+			</interactionClass>
+		</interactionClass>
+	</interactions>
+	<dimensions/>
+	<synchronizations>
+		<synchronizationPoint>
+			<label>READY_TO_RUN</label>
+			<capability>RegisterAchieve</capability>
+			<semantics>Sync point achieved when a federate joins the federation and completes the HLA initialization</semantics>
+		</synchronizationPoint>
+	</synchronizations>
+	<transportations/>
+	<switches>
+      <autoProvide isEnabled="false"/>
+      <conveyRegionDesignatorSets isEnabled="false"/>
+      <conveyProducingFederate isEnabled="false"/>
+      <attributeScopeAdvisory isEnabled="false"/>
+      <attributeRelevanceAdvisory isEnabled="false"/>
+      <objectClassRelevanceAdvisory isEnabled="false"/>
+      <interactionRelevanceAdvisory isEnabled="false"/>
+      <serviceReporting isEnabled="false"/>
+      <exceptionReporting isEnabled="false"/>
+      <delaySubscriptionEvaluation isEnabled="false"/>
+      <automaticResignAction resignAction="CancelThenDeleteThenDivest"/>
+   </switches>
+	<dataTypes/>
+</objectModel>

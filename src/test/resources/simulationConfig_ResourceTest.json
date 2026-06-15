@@ -1,0 +1,8 @@
+{
+  "simulationType": "LOCAL",
+  "timeUnit": "SECONDS",
+  "simulationLength": 10000.0,
+  "numberOfTokens": 10,
+  "precision": 2,
+  "seed": 202601010000
+}

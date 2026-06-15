@@ -1,0 +1,21 @@
+CaseId,StartTimestamp,CompletionTimestamp,Activity,Resource,Role,LocalEntity,RemoteEntity,CommunicationType,Data
+1,2026/04/15 12:21:37.902,2026/04/15 12:24:04.415,Task1,Name1,Office1,ParticipantA,,,
+1,,2026/04/15 12:24:04.415,IMT,,,ParticipantA,ParticipantB,send,ciao
+2,2026/04/15 12:33:17.446,2026/04/15 12:36:03.634,Task1,Name1,Office1,ParticipantA,,,
+3,2026/04/15 12:36:03.634,2026/04/15 12:38:21.865,Task1,Name1,Office1,ParticipantA,,,
+2,,2026/04/15 12:36:03.634,IMT,,,ParticipantA,ParticipantB,send,ciao
+4,2026/04/15 12:38:21.865,2026/04/15 12:41:24.912,Task1,Name1,Office1,ParticipantA,,,
+3,2026/04/15 12:38:21.865,2026/04/15 12:43:22.751,Task2,Name2,Office2,ParticipantA,,,
+4,,2026/04/15 12:41:24.912,IMT,,,ParticipantA,ParticipantB,send,ciao
+5,2026/04/15 12:44:40.469,2026/04/15 12:46:58.818,Task1,Name1,Office1,ParticipantA,,,
+6,2026/04/15 12:46:58.818,2026/04/15 12:50:18.741,Task1,Name1,Office1,ParticipantA,,,
+5,,2026/04/15 12:46:58.818,IMT,,,ParticipantA,ParticipantB,send,ciao
+6,2026/04/15 12:50:18.741,2026/04/15 12:55:08.452,Task2,Name2,Office2,ParticipantA,,,
+7,2026/04/15 12:51:09.040,2026/04/15 12:53:27.254,Task1,Name1,Office1,ParticipantA,,,
+7,,2026/04/15 12:53:27.254,IMT,,,ParticipantA,ParticipantB,send,ciao
+8,2026/04/15 12:55:28.636,2026/04/15 12:57:52.111,Task1,Name1,Office1,ParticipantA,,,
+9,2026/04/15 12:57:52.111,2026/04/15 13:00:00.942,Task1,Name1,Office1,ParticipantA,,,
+8,2026/04/15 12:57:52.111,2026/04/15 13:03:15.880,Task2,Name2,Office2,ParticipantA,,,
+10,2026/04/15 13:00:00.942,2026/04/15 13:02:29.018,Task1,Name1,Office1,ParticipantA,,,
+9,,2026/04/15 13:00:00.942,IMT,,,ParticipantA,ParticipantB,send,ciao
+10,2026/04/15 13:03:15.880,2026/04/15 13:08:13.286,Task2,Name2,Office2,ParticipantA,,,

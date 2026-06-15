@@ -1,0 +1,15 @@
+{
+  "simulationType": "DISTRIBUTED",
+  "federationName": "eBPMNFederation",
+  "federateName": "ParticipantA",
+  "controller": true,
+  "numbersOfFederates": 2,
+  "rtiHostName": "localhost",
+  "rtiPortNumber": 8989,
+  "simulationLength": 10000,
+  "numberOfTokens": 10,
+  "timeUnit": "SECONDS",
+  "precision": 2,
+  "lookahead": 10,
+  "seed": 202511061230
+}
