@@ -8,7 +8,6 @@ import java.util.TreeSet;
 import it.uniroma2.sel.ebpmn.bpmn.FlowNode;
 import it.uniroma2.sel.ebpmn.bpmn.Participant;
 import it.uniroma2.sel.ebpmn.events.*;
-import it.uniroma2.sel.ebpmn.exceptions.BPMNException;
 import it.uniroma2.sel.ebpmn.exceptions.NodeNotFoundException;
 import it.uniroma2.sel.ebpmn.exceptions.UnexpectedEvent;
 import it.uniroma2.sel.ebpmn.logger.CommunicationKind;
@@ -52,9 +51,6 @@ public class Task extends FlowNode{
 
 	/** Index of the last resource used; advances round-robin on each claim. */
 	protected int lastResourceIndex;
-
-	/** Reference to the future-event list (currently unused; kept for compatibility). */
-	protected EventsList l;
 
 	/** Wall-clock start time of the simulation run; used for log timestamp computation. */
 	protected LocalDateTime initialTime;
@@ -431,7 +427,6 @@ public class Task extends FlowNode{
 				 */
 
 				t.setTime(t.getTaskArrivalTime());
-				tokenQueue.add(t);
 				tokenQueue.add(t);
 				System.out.println(time + ") " + this.getParticipant().getName() + " - " + this.getName()
 						+ ": RESTART — Token ID " + t.getTokenId() + " re-queued with time: " + t.getTime());
