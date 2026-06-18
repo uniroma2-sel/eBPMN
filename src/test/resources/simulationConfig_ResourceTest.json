@@ -1,4 +1,5 @@
 {
+  "outputFolder": "/Users/boccia/IdeaProjects/eBPMNv2/src/test/output/Test3/",
   "simulationType": "LOCAL",
   "timeUnit": "SECONDS",
   "simulationLength": 10000.0,

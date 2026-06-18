@@ -5,9 +5,7 @@ import it.uniroma2.sel.ebpmn.bpmn.events.Start;
 import it.uniroma2.sel.ebpmn.bpmn.tasks.Task;
 import it.uniroma2.sel.ebpmn.configuration.SimulationConfig;
 import it.uniroma2.sel.ebpmn.engine.ExecutionEngine;
-import it.uniroma2.sel.ebpmn.generators.ExponentialGenerator;
-import it.uniroma2.sel.ebpmn.generators.LognormalGenerator;
-import it.uniroma2.sel.ebpmn.generators.NormalGenerator;
+import it.uniroma2.sel.ebpmn.generators.DeterministicGenerator;
 import it.uniroma2.sel.ebpmn.logger.CSVLogger;
 import it.uniroma2.sel.ebpmn.resources.Broker;
 import it.uniroma2.sel.ebpmn.resources.Performer;
@@ -17,7 +15,7 @@ import it.uniroma2.sel.ebpmn.resources.policies.StandbyMode;
 import it.uniroma2.sel.ebpmn.resources.policies.TokenOnFailure;
 
 /**
- * Demonstration of structured Resource support
+ * Demonstration of structured Resource support.
  *
  * Resource hierarchy:
  *
@@ -31,16 +29,16 @@ import it.uniroma2.sel.ebpmn.resources.policies.TokenOnFailure;
  *
  * Expected console output: multiple "[Broker/Subsystem] failed/repaired" lines.
  */
-public class Test3_ResourceHierarchy {
+public class Test6_BrokerPolicy {
 
     public static void main(String[] args) throws Exception {
 
         SimulationConfig config = SimulationConfig.load(
-                "src/test/resources/simulationConfig_ResourceTest.json");
+                "src/test/resources/simulationConfig_Test5.json");
         System.out.println(config.toString());
 
         ExecutionEngine engine = ExecutionEngine.initialize(config);
-        CSVLogger log = new CSVLogger(config.getOutputFolder() + "test3_output.csv");
+        CSVLogger log = new CSVLogger(config.getOutputFolder() + "test5_output.csv");
 
         Participant p1 = new Participant("ProductionLine", true);
 
@@ -50,25 +48,25 @@ public class Test3_ResourceHierarchy {
 
         // PickingUnitA — primary pick-and-place arm
         Performer pickingUnitA = new Performer("PickingUnitA", p1,
-                new LognormalGenerator(5*60, 10),
-                new ExponentialGenerator(1.0 / (3*60)));
+                new DeterministicGenerator(6),
+                new DeterministicGenerator(3));
 
         // PickingUnitB — backup pick-and-place arm
         Performer pickingUnitB = new Performer("PickingUnitB", p1,
-                new LognormalGenerator(7*60, 10),
-                new ExponentialGenerator(1.0 / (3*60)));
+                new DeterministicGenerator(7),
+                new DeterministicGenerator(8));
 
         // ConveyorBelt
-        Performer conveyorBelt = new Performer("ConveyorBelt", p1,
-                new LognormalGenerator(30*60, 60),
-                new ExponentialGenerator(1.0 / (60*10)));
+        Performer conveyorBelt = new Performer("ConveyorBelt", p1); /*,
+                new DeterministicGenerator(12),
+                new DeterministicGenerator(20),
+                TokenOnFailure.DISCARD,
+                QueueOnFailure.FLUSH);*/
 
         // -----------------------------------------------------------------------
-        // Broker: redundant pick-and-place tool
-        //   Switch time ~ Exponential(lambda=1/30) → E[X] ≈ 30 s
+        // Broker: redundant pick-and-place tool, no switch time
         // -----------------------------------------------------------------------
-        Broker pickTool = new Broker("PickTool", p1, StandbyMode.HOT,
-                new ExponentialGenerator(1.0 / 30));
+        Broker pickTool = new Broker("PickTool", p1, StandbyMode.HOT);
         pickTool.addAlternative(pickingUnitA);
         pickTool.addAlternative(pickingUnitB);
 
@@ -78,18 +76,20 @@ public class Test3_ResourceHierarchy {
         Subsystem feedingStation = new Subsystem("FeedingStation", p1);
         feedingStation.addComponent(pickTool);
         feedingStation.addComponent(conveyorBelt);
+        feedingStation.setTokenOnFailure(TokenOnFailure.DISCARD);
+        feedingStation.setQueueOnFailure(QueueOnFailure.FLUSH);
 
         // -----------------------------------------------------------------------
         // Process flow
-        //   Interarrival ~ Exponential(lambda=1/300) → one token every ~5 min avg
-        //   Service time ~ Normal(5.0, 0.5) seconds
+        //   Interarrival: one token every 5 sec
+        //   Service time: 1 second
         // -----------------------------------------------------------------------
         Start start = new Start("Start", p1,
-                new ExponentialGenerator(1.0 / (5*60)),
+                new DeterministicGenerator(1),
                 config.getNumberOfTokens());
 
         Task componentFeeding = new Task("ComponentFeeding", p1,
-                new NormalGenerator(5.0, 0.5));
+                new DeterministicGenerator(5));
         componentFeeding.addResource(feedingStation);
 
         End end = new End("End", p1);

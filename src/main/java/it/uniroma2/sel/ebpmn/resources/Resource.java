@@ -11,6 +11,8 @@ import it.uniroma2.sel.ebpmn.events.SwitchCompletedEvent;
 import it.uniroma2.sel.ebpmn.events.TokenServiceCompleted;
 import it.uniroma2.sel.ebpmn.events.IncomingToken;
 import it.uniroma2.sel.ebpmn.generators.RandomVariableGenerator;
+import it.uniroma2.sel.ebpmn.resources.policies.QueueOnFailure;
+import it.uniroma2.sel.ebpmn.resources.policies.TokenOnFailure;
 
 /**
  * Abstract base class for all eBPMN resource types.
@@ -71,6 +73,17 @@ public class Resource {
      * Used to propagate failure/repair notifications upward.
      */
     protected final List<Resource> parents = new ArrayList<>();
+
+    // -----------------------------------------------------------------------
+    // In-service state and failure/queue policies (used by Performer subclass)
+    // -----------------------------------------------------------------------
+
+    protected IncomingToken         tokenInService       = null;
+    protected double                serviceStartTime     = 0.0;
+    protected double                remainingServiceTime = 0.0;
+    protected TokenServiceCompleted pendingCompletion    = null;
+    protected TokenOnFailure        tokenOnFailure       = TokenOnFailure.DELAY;
+    protected QueueOnFailure        queueOnFailure       = QueueOnFailure.KEEP;
 
     // -----------------------------------------------------------------------
     // Legacy reliability generators (kept for backward compat; see Performer)
@@ -142,14 +155,73 @@ public class Resource {
         return this.isFree && this.available;
     }
 
-    /** Alias without the typo — preferred in new code. */
-    //public boolean isAvailable() { return isAvailabe(); }
-
     public void setBusy() { this.isFree = false; }
     public void free()    { this.isFree = true;  }
 
     public void addTask(Task t) { this.tasks.add(t); }
     public ArrayList<Task> getTasks() { return this.tasks; }
+
+    public void setTokenOnFailure(TokenOnFailure policy) { this.tokenOnFailure = policy; }
+    public void setQueueOnFailure(QueueOnFailure policy) { this.queueOnFailure = policy; }
+    public TokenOnFailure getTokenOnFailure() { return tokenOnFailure; }
+
+    /**
+     * Applies the TokenOnFailure policy when this resource fails while serving a token.
+     * Called by {@link it.uniroma2.sel.ebpmn.bpmn.tasks.Task#onResourceFailed} upon
+     * failure notification.
+     *
+     * <p>For {@link TokenOnFailure#RESTART}, {@code tokenInService} is intentionally
+     * left non-null so the caller can retrieve and re-enqueue the token immediately
+     * after this call via {@link #getAndClearTokenInService()}.
+     *
+     * @param time current simulation time (failure timestamp)
+     */
+    public void applyTokenOnFailure(double time) {
+        if (tokenInService == null || pendingCompletion == null) return;
+
+        switch (tokenOnFailure) {
+            case DELAY:
+                remainingServiceTime = Math.max(0.0, pendingCompletion.getTime() - time);
+                pendingCompletion.cancel();
+                pendingCompletion = null;
+                System.out.println(time + ") Resource " + getName()
+                        + ": DELAY — token " + tokenInService.getTokenId()
+                        + " paused, remaining=" + String.format("%.2f", remainingServiceTime));
+                break;
+
+            case DISCARD:
+                pendingCompletion.cancel();
+                pendingCompletion = null;
+                tokenInService = null;
+                free();
+                System.out.println(time + ") Resource " + getName()
+                        + ": DISCARD — token lost");
+                break;
+
+            case RESTART:
+                pendingCompletion.cancel();
+                pendingCompletion = null;
+                free();
+                // tokenInService left non-null: caller retrieves it via
+                // getAndClearTokenInService() immediately after this call.
+                System.out.println(time + ") Resource " + getName()
+                        + ": RESTART — token " + tokenInService.getTokenId()
+                        + " will be re-queued with time " + tokenInService.getTime());
+                break;
+        }
+    }
+
+    /**
+     * Returns the token currently in service and clears the internal reference.
+     * Must be called AFTER {@link #applyTokenOnFailure(double)} for the RESTART policy.
+     *
+     * @return the token in service, or {@code null} if none
+     */
+    public IncomingToken getAndClearTokenInService() {
+        IncomingToken t = tokenInService;
+        tokenInService = null;
+        return t;
+    }
 
     // -----------------------------------------------------------------------
     // Legacy MTTF/MTTR accessors
@@ -184,21 +256,61 @@ public class Resource {
         for (Resource parent : parents) {
             parent.onChildFailure(this);
         }
+        double now = ExecutionEngine.getInstance().getSimulationTime();
+        for (Task task : tasks) {
+            task.onResourceFailed(this, now);
+        }
     }
 
     /**
      * Called when this resource repairs.
-     * Sets available=true, propagates to Resource parents, then triggers Task queues.
+     * If the DELAY policy is active and a token was in service, resumes it by
+     * scheduling a new {@link TokenServiceCompleted} for the remaining service time
+     * and notifying only Resource parents (the resource stays busy).
+     * Otherwise sets available=true, propagates to Resource parents, and triggers
+     * Task queues so waiting tokens can be processed.
      */
     protected void notifyRepair() {
         available = true;
-        for (Resource parent : parents) {
-            parent.onChildRepair(this);
-        }
-        // Notify directly-associated Tasks so they can process their queued tokens.
-        double now = ExecutionEngine.getInstance().getSimulationTime();
-        for (Task task : tasks) {
-            task.onResourceRepaired(this, now);
+
+        if (tokenOnFailure == TokenOnFailure.DELAY && tokenInService != null) {
+            // Resume in-progress service: schedule a new TokenServiceCompleted
+            // at repairTime + remainingServiceTime, mark resource busy again.
+            double now = ExecutionEngine.getInstance().getSimulationTime();
+            List<Task> ts = new ArrayList<>(tasks);
+            if (!ts.isEmpty()) {
+                Task task = ts.get(0);
+                setBusy();
+                TokenServiceCompleted resumeCompletion = new TokenServiceCompleted(
+                        tokenInService.getTokenId(),
+                        now + remainingServiceTime,
+                        task,
+                        tokenInService.getStartTimestamp());
+                resumeCompletion.setResource(this);
+                ExecutionEngine.getInstance().scheduleLocalEvent(resumeCompletion);
+                System.out.println(now + ") Resource " + getName()
+                        + ": DELAY resume — token " + tokenInService.getTokenId()
+                        + " completes at " + String.format("%.2f", now + remainingServiceTime));
+                tokenInService = null;
+
+                // Notify only Resource parents — resource is busy with resumed service
+                for (Resource parent : parents) parent.onChildRepair(this);
+            }
+        } else {
+            // No token to resume: notify parents and tasks normally
+            tokenInService = null;
+            for (Resource parent : parents) {
+                parent.onChildRepair(this);
+            }
+            if (queueOnFailure == QueueOnFailure.FLUSH) {
+                for (Task task : tasks) {
+                    task.flushQueue();
+                }
+            }
+            double now = ExecutionEngine.getInstance().getSimulationTime();
+            for (Task task : tasks) {
+                task.onResourceRepaired(this, now);
+            }
         }
     }
 
@@ -224,9 +336,6 @@ public class Resource {
 
     /**
      * Called by Task immediately before scheduling TokenServiceCompleted.
-     * Default: marks this resource as busy.
-     * Performer overrides this to also store the token reference and schedule
-     * the first failure event.
      *
      * @param token        the token entering service
      * @param startTime    simulation time at which service begins
@@ -237,6 +346,10 @@ public class Resource {
     public void onServiceStarted(IncomingToken token, double startTime, double serviceDuration,
                                  TokenServiceCompleted pending, Task handlerTask) {
         setBusy();
+        this.tokenInService       = token;
+        this.serviceStartTime     = startTime;
+        this.remainingServiceTime = serviceDuration;
+        this.pendingCompletion    = pending;
     }
 
     /**
@@ -250,7 +363,12 @@ public class Resource {
      *
      * @param time simulation time at which service completion is processed
      */
-    public void onServiceCompleted(double time) {}
+    public void onServiceCompleted(double time) {
+        tokenInService       = null;
+        pendingCompletion    = null;
+        serviceStartTime     = 0.0;
+        remainingServiceTime = 0.0;
+    }
 
     // -----------------------------------------------------------------------
     // Resource-event dispatch hooks (called by the new event types)

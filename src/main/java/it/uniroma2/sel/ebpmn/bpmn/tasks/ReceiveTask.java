@@ -112,22 +112,20 @@ public class ReceiveTask extends Task{
 			//DEBUG
 			System.out.println(e.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + ": Found available resource " + r.getName() );
 			System.out.println(e.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + ": Starting processing of Token ID " + e.getTokenId());
-	
-
-			//mark the resource as busy
-			r.setBusy();
 
 			//a SERVICE_COMPLETE event is scheduled on this entity
 			serviceTime = generator.get();
 			TokenServiceCompleted serviceCompleteEvent = new TokenServiceCompleted(e.getTokenId(),
 					e.getTime()+serviceTime, this, e.getStartTimestamp());
 			serviceCompleteEvent.setResource(r);
+			//mark the resource as busy - if overriden (e.g., performer)  also stores the token reference
+			r.onServiceStarted(e, e.getTime(), serviceTime, serviceCompleteEvent, this);
             try {
                 this.receiveEvent(serviceCompleteEvent);
             } catch (UnexpectedEvent ex) {
                 throw new RuntimeException(ex);
             }
-            //l.addEvent(serviceCompleteEvent);
+
 			
 			//Writing the log entry
 			log(e.getTokenId(), e.getTime(), serviceTime, message.getSourceEntity(), message.getMessagePayload());
@@ -142,83 +140,6 @@ public class ReceiveTask extends Task{
 			System.out.println(e.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + " Token ID " + e.getTokenId() + " enqueued");
 		}
 	}
-
-	
-	@Override
-	protected void completeTokenService(TokenServiceCompleted e) throws UnexpectedEvent {
-		//LOG
-		System.out.println(e.getTime() + ")  " + this.getParticipant().getName() + " - " 
-		+ this.getName() + ": Token " + e.getTokenId() + " Served ");
-		System.out.println(e.getTime() + ")  " + this.getParticipant().getName() + " - "
-		+ this.getName() + ": Resource " + e.getResource().getName() + " is now free");
-
-		//the involved resource is marked as available
-		Resource r = e.getResource();
-		r.free();
-
-		/*
-		 * To route the token towards the next node, a new INCOMING_TOKEN event is created
-		 * */
-		FlowNode targetEntity = this.getNextNode();
-		IncomingToken incomingTokenEvent = new IncomingToken(e.getTokenId(), e.getTime(),
-								targetEntity, e.getStartTimestamp());
-        try {
-            targetEntity.receiveEvent(incomingTokenEvent);
-        } catch (UnexpectedEvent ex) {
-            throw new RuntimeException(ex);
-        }
-        //l.addEvent(incomingTokenEvent);
-
-		//LOG
-		System.out.println(e.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName()
-		+ ": Scheduled INCOMING TOKEN event at time "
-		+ incomingTokenEvent.getTime() + " "
-		+ "for " + incomingTokenEvent.getHandlerEntity().getName());
-
-
-		//check for enqueued tokens waiting for a free resource
-		if(!tokenQueue.isEmpty() && checkForAvailableResource() && !messageQueue.isEmpty()) {
-
-			IncomingToken dequeuedToken = (IncomingToken)tokenQueue.pollFirst();
-			//update the time of the dequeued token to now before processing it
-			dequeuedToken.setTime(engine.getSimulationTime());
-			processToken(dequeuedToken);
-		}
-		else {
-			/*
-			 * If the resource is also assigned to other tasks, the same check must
-			 * be performed for all. The first token waiting in the queue of a task
-			 * is processed.
-			 * 
-			 * For a ReceiveTask is also checked whether a message is available 
-			 * */
-			ArrayList<Task> tasks = r.getTasks();
-			for(Task t : tasks) {
-				if(t.hasPendingTokens()){
-				/*if((!(t instanceof ReceiveTask)) && !t.tokenQueue.isEmpty()
-						||
-				(t instanceof ReceiveTask) && !((ReceiveTask)t).messageQueue.isEmpty() &&!t.tokenQueue.isEmpty() ){*/
-					/*
-					 * found a Task associated to r in which at least
-					 * a token is still waiting in the token queue
-					 */
-					IncomingToken token = (IncomingToken)t.tokenQueue.pollFirst();
-					//update the time of the dequeued token to now before processing it
-					token.setTime(e.getTime());
-
-					//LOG
-					System.out.println(e.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName()
-						+ ": Resource " + r.getName() + " find pending Token " +  token.getTokenId()
-						+ " still waiting in queue at " + t.getName());
-
-					t.processToken(token);
-				}
-			}
-
-		}
-
-	}
-
 	
 	private void ProcessMessage(IncomingMessage message)  throws UnexpectedEvent{
 		/*

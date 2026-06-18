@@ -22,12 +22,23 @@ import it.uniroma2.sel.ebpmn.exceptions.UnexpectedEvent;
  */
 public class IncomingToken extends Token {
 
+	/**
+	 * Time at which this token first entered the waiting queue of a Task.
+	 * Set once on first enqueue and never overwritten, so that RESTART policy
+	 * can restore the token's position in the queue after a mid-service failure.
+	 * Initialized to -1.0 (sentinel: not yet enqueued).
+	 */
+	private double taskArrivalTime = -1.0;
+
 	public IncomingToken(String id, double time, FlowNode entity) {
 		super(id, time, entity);
 	}
 	public IncomingToken(String id, double time, FlowNode entity, double startTime) {
 		super(id, time, entity, startTime);
 	}
+
+	public double getTaskArrivalTime() { return taskArrivalTime; }
+	public void setTaskArrivalTime(double t) { this.taskArrivalTime = t; }
 
 	@Override
 	public void processByHandler() throws UnexpectedEvent {

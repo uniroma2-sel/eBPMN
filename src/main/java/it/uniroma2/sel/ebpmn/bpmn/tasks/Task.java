@@ -14,6 +14,7 @@ import it.uniroma2.sel.ebpmn.exceptions.UnexpectedEvent;
 import it.uniroma2.sel.ebpmn.logger.CommunicationKind;
 import it.uniroma2.sel.ebpmn.logger.LogData;
 import it.uniroma2.sel.ebpmn.resources.Resource;
+import it.uniroma2.sel.ebpmn.resources.policies.TokenOnFailure;
 import it.uniroma2.sel.ebpmn.generators.RandomVariableGenerator;
 
 /**
@@ -189,6 +190,13 @@ public class Task extends FlowNode{
 		initialTime = engine.getInitialTime();
 		dateTimeFormat = engine.getDateTimeFormat();
 
+
+		/*
+		 * Record the token's arrival time at this task on first visit only;
+		 * preserved for RESTART policy to restore queue position after mid-service failure.
+		 */
+		if (t.getTaskArrivalTime() == -1.0) t.setTaskArrivalTime(t.getTime());
+
 		if (checkForAvailableResource()) {
 			/* if at least one resource is available and the token queue is
 			 * empty, the token is processed otherwise it is enqueued.
@@ -278,12 +286,17 @@ public class Task extends FlowNode{
 
 
 		//check for enqueued tokens waiting for a free resource
-		if(!tokenQueue.isEmpty() && checkForAvailableResource()) {
+		if(hasPendingTokens() && checkForAvailableResource()) {
 			IncomingToken dequeuedToken = (IncomingToken)tokenQueue.pollFirst();
 			//update the time of the dequeued token to now before processing it
 			
 			System.out.println(token.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + ": Found Token ID " + dequeuedToken.getTokenId() + " in queue with availabe resources" );
-			
+
+			/*
+			* The orignal task arrival time is preserved so that RESTART policy
+			* can restore the token's position in the queue after a mid-service failure.
+			*/
+			dequeuedToken.setTaskArrivalTime(dequeuedToken.getTime());
 			dequeuedToken.setTime(engine.getSimulationTime());
 			processToken(dequeuedToken);
 		}
@@ -299,28 +312,16 @@ public class Task extends FlowNode{
 			ArrayList<Task> tasks = r.getTasks();
 			//tasks.remove(this);
 			for(Task t : tasks) {
-
-				if(t.hasPendingTokens()){
-				/*
-				if((!(t instanceof ReceiveTask)) && !t.tokenQueue.isEmpty()
-						||
-				(t instanceof ReceiveTask) && !((ReceiveTask)t).isMessageQueueEmpty() && !t.tokenQueue.isEmpty()) {
-				*/
-
-					/*
-					 * found a Task associated to r in which at least
-					 * a token is still waiting in the token queue
-					 */
+				if(t.hasPendingTokens() && t.checkForAvailableResource()){
 					IncomingToken iToken = (IncomingToken)t.tokenQueue.pollFirst();
-					//update the time of the dequeued token to now before processing it
 					iToken.setTime(token.getTime());
 
-					//LOG
-					System.out.println(token.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + ": Resource " + r.getName() + " find pending Token " +  token.getTokenId()
-						+ " still waiting in queue at " + t.getName());
+					System.out.println(token.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName()
+							+ ": Resource " + r.getName() + " find pending Token ID " + iToken.getTokenId()
+							+ " still waiting in queue at " + t.getName());
 
 					t.processToken(iToken);
-					break; //if a task is discovered the resource became busy
+					break;
 				}
 			}
 
@@ -405,8 +406,43 @@ public class Task extends FlowNode{
 	}
 
 	// -----------------------------------------------------------------------
-	// Resource-repair integration
+	// Resource-failure / repair integration
 	// -----------------------------------------------------------------------
+
+	/**
+	 * Called by {@code Resource#notifyFailure()} when a resource that serves
+	 * this Task fails. Delegates policy logic to
+	 * {@link Resource#applyTokenOnFailure(double)} and re-enqueues the token
+	 * for the {@link TokenOnFailure#RESTART} policy.
+	 *
+	 * @param r    the resource that just failed
+	 * @param time current simulation time (failure timestamp)
+	 */
+	public void onResourceFailed(Resource r, double time) {
+		System.out.println(time + ") " + this.getParticipant().getName() + " - " + this.getName()
+				+ ": resource " + r.getName() + " failed — applying TokenOnFailure policy");
+
+		// Apply policy first: cancels pendingCompletion, updates remainingServiceTime.
+		// For RESTART, tokenInService is intentionally left non-null after this call.
+		r.applyTokenOnFailure(time);
+
+		// After applyTokenOnFailure(), retrieve and re-enqueue the token if RESTART.
+		if (r.getTokenOnFailure() == TokenOnFailure.RESTART) {
+			IncomingToken t = r.getAndClearTokenInService();
+			if (t != null) {
+				/*
+				 * RESTART: restore the token's original arrival time so it regains
+				 * its correct position in the queue ahead of later arrivals.
+				 */
+
+				t.setTime(t.getTaskArrivalTime());
+				tokenQueue.add(t);
+				tokenQueue.add(t);
+				System.out.println(time + ") " + this.getParticipant().getName() + " - " + this.getName()
+						+ ": RESTART — Token ID " + t.getTokenId() + " re-queued with time: " + t.getTime());
+			}
+		}
+	}
 
 	/**
 	 * Called by {@code Resource#notifyRepair()} (through the parent chain) when
@@ -420,7 +456,7 @@ public class Task extends FlowNode{
 	public void onResourceRepaired(Resource r, double time) {
 		System.out.println(time + ") " + this.getParticipant().getName() + " - " + this.getName()
 				+ ": resource " + r.getName() + " repaired — checking token queue");
-		if (!tokenQueue.isEmpty() && checkForAvailableResource()) {
+		if (hasPendingTokens() && checkForAvailableResource()) {
 			IncomingToken dequeuedToken = (IncomingToken) tokenQueue.pollFirst();
 			dequeuedToken.setTime(time);
 			try {

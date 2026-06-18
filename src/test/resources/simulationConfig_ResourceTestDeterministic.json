@@ -1,0 +1,9 @@
+{
+  "outputFolder": "/Users/boccia/IdeaProjects/eBPMNv2/src/test/output/Test4/",
+  "simulationType": "LOCAL",
+  "timeUnit": "SECONDS",
+  "simulationLength": 50.0,
+  "numberOfTokens": 5,
+  "precision": 2,
+  "seed": 202601010000
+}

@@ -80,28 +80,6 @@ public class Broker extends Resource {
         this(name, participant, standbyMode, null);
     }
 
-    /**
-     * Switch time only, HOT standby (backward-compatible with original API).
-     *
-     * @param name                resource name
-     * @param participant         owning participant
-     * @param switchTimeGenerator distribution of switchover delay; {@code null} = instantaneous
-     */
-    public Broker(String name, Participant participant,
-                  RandomVariableGenerator switchTimeGenerator) {
-        this(name, participant, StandbyMode.HOT, switchTimeGenerator);
-    }
-
-    /**
-     * Convenience constructor: HOT standby, instantaneous switching.
-     *
-     * @param name        resource name
-     * @param participant owning participant
-     */
-    public Broker(String name, Participant participant) {
-        this(name, participant, StandbyMode.HOT, null);
-    }
-
     // -----------------------------------------------------------------------
     // Alternative management
     // -----------------------------------------------------------------------

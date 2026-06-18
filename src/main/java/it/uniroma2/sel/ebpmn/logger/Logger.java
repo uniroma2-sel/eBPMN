@@ -3,6 +3,7 @@ package it.uniroma2.sel.ebpmn.logger;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
@@ -37,9 +38,10 @@ public abstract class Logger {
 	 */
 	public Logger(String fileName) {
 		try {
-			writer = Files.newBufferedWriter(Paths.get(fileName));
+			Path path = Paths.get(fileName);
+			Files.createDirectories(path.getParent());
+			writer = Files.newBufferedWriter(path);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

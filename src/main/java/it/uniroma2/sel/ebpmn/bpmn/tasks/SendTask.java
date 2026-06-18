@@ -67,15 +67,13 @@ public class SendTask extends Task{
 			System.out.println(t.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + ": Found available resource " + r.getName() );
 			System.out.println(t.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + ": Starting processing of Token ID " + t.getTokenId());
 
-
-			//mark the resource as busy
-			r.setBusy();
-
 			//a SERVICE_COMPLETE event is scheduled on this entity
 			serviceTime = generator.get();
 			TokenServiceCompleted serviceCompleteEvent = new TokenServiceCompleted(t.getTokenId(),
 					t.getTime()+serviceTime, this, t.getStartTimestamp());
 			serviceCompleteEvent.setResource(r);
+			//mark the resource as busy - if overriden (e.g., performer)  also stores the token reference
+			r.onServiceStarted(t, t.getTime(), serviceTime, serviceCompleteEvent, this);
 			this.receiveEvent(serviceCompleteEvent);
 
 			//Writing the log entry
