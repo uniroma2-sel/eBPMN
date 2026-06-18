@@ -94,7 +94,13 @@ public class ReceiveTask extends Task{
 		initialTime = engine.getInitialTime();
 		dateTimeFormat = engine.getDateTimeFormat(); 
 		IncomingMessage message;
-		
+
+		/*
+		 * Record the token's arrival time at this task on first visit only;
+		 * preserved for RESTART policy to restore queue position after mid-service failure.
+		 */
+		if (e.getTaskArrivalTime() == -1.0) e.setTaskArrivalTime(e.getTime());
+
 		/* if at least on resource is available and an incoming message is available, 
 		 * the token is processed. Otherwise it is enqueued.
 		 */

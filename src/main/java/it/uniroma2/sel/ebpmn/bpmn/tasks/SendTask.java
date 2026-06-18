@@ -55,6 +55,12 @@ public class SendTask extends Task{
 		initialTime = engine.getInitialTime();
 		dateTimeFormat = engine.getDateTimeFormat();
 
+		/*
+		 * Record the token's arrival time at this task on first visit only;
+		 * preserved for RESTART policy to restore queue position after mid-service failure.
+		 */
+		if (t.getTaskArrivalTime() == -1.0) t.setTaskArrivalTime(t.getTime());
+
 		if (checkForAvailableResource()) {
 			/* if at least on resource is available and the token queue is
 			 * empty, the token is processed otherwise it is enqueued.

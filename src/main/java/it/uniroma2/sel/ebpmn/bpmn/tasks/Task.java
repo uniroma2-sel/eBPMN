@@ -292,11 +292,6 @@ public class Task extends FlowNode{
 			
 			System.out.println(token.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + ": Found Token ID " + dequeuedToken.getTokenId() + " in queue with availabe resources" );
 
-			/*
-			* The orignal task arrival time is preserved so that RESTART policy
-			* can restore the token's position in the queue after a mid-service failure.
-			*/
-			dequeuedToken.setTaskArrivalTime(dequeuedToken.getTime());
 			dequeuedToken.setTime(engine.getSimulationTime());
 			processToken(dequeuedToken);
 		}
