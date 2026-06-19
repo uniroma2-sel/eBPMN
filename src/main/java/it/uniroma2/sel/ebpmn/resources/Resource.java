@@ -146,6 +146,17 @@ public class Resource {
     public String getRole() { return role; }
 
     /**
+     * Returns the simulation time at which the current (or most recent) service
+     * started on this resource. Used by {@link it.uniroma2.sel.ebpmn.bpmn.tasks.Task}
+     * to compute the actual service duration for logging at completion time.
+     *
+     * @return the service start time, or {@code 0.0} if no service has started yet
+     */
+    public double getServiceStartTime() { return serviceStartTime; }
+
+
+
+    /**
      * Returns {@code true} only when the resource is BOTH operationally up
      * (not failed) AND not currently serving a token (not busy).
      *

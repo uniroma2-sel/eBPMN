@@ -1,9 +1,9 @@
 package it.uniroma2.sel.ebpmn.bpmn.tasks;
 
-import java.util.ArrayList;
-import java.util.TreeSet;
 
-import it.uniroma2.sel.ebpmn.bpmn.FlowNode;
+import java.util.TreeSet;
+import java.util.HashMap;
+import java.util.Map;
 import it.uniroma2.sel.ebpmn.bpmn.Participant;
 import it.uniroma2.sel.ebpmn.events.Event;
 import it.uniroma2.sel.ebpmn.events.IncomingMessage;
@@ -37,6 +37,12 @@ public class ReceiveTask extends Task{
 
 	/** Queue of messages waiting to be paired with an incoming token. */
 	private TreeSet<Event> messageQueue;
+
+	/* Stores the consumed message for each token.
+	 * Used to retrieve the message source and payload when the participant's log is written
+	 * and the message reference is no longer available
+	 */
+	private Map<String, IncomingMessage> pendingMessages = new HashMap<>();
 	
 	public ReceiveTask(String name, Participant p, RandomVariableGenerator gen) {
 		super(name, p, gen);
@@ -107,8 +113,9 @@ public class ReceiveTask extends Task{
 
 		if (checkForAvailableResource() && !this.messageQueue.isEmpty()) {
 			
-			//a message is consumed
-			message = (IncomingMessage)messageQueue.pollFirst(); //message consumed
+			//a message is consumed and stored to be used when the participant's log is written
+			message = (IncomingMessage)messageQueue.pollFirst();
+			pendingMessages.put(e.getTokenId(), message);
 			
 			System.out.println(e.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + ": Found available message ");
 			
@@ -133,8 +140,8 @@ public class ReceiveTask extends Task{
             }
 
 			
-			//Writing the log entry
-			log(e.getTokenId(), e.getTime(), serviceTime, message.getSourceEntity(), message.getMessagePayload());
+			//**** PB Writing the log entry
+			//log(e.getTokenId(), e.getTime(), serviceTime, message.getSourceEntity(), message.getMessagePayload());
 	        
 			//LOG
 			System.out.println(e.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + ": Scheduled SERVICE COMPLETE event for Token ID " + serviceCompleteEvent.getTokenId() + " at time "
@@ -173,13 +180,18 @@ public class ReceiveTask extends Task{
 		 */
 		return super.hasPendingTokens() && !isMessageQueueEmpty();
 	}
-	
-	protected void log(String tokenId, double tokenLogicalTime, double serviceTime, String remoteEntity, String messagePayload) {
+
+	@Override
+	protected void log(String tokenId, double tokenLogicalTime, double serviceTime) {
 
 		LogData ld = new LogData(); 
 		
 		//token ID corresponds to the case ID
-		ld.setCaseId(tokenId);  
+		ld.setCaseId(tokenId);
+
+		//retrieve the message consumed by the token
+		IncomingMessage message = pendingMessages.remove(tokenId);
+		if (message == null) return;
 		
 		/*
 		 * As the service is a double, its value is divided into seconds and nanoseconds
@@ -219,9 +231,9 @@ public class ReceiveTask extends Task{
         ld.setResources(res);
         ld.setRoles(roles);
         ld.setLocalEntity(this.getParticipant().getName());
-        ld.setRemoteEntity(remoteEntity);
+        ld.setRemoteEntity(message.getSourceEntity());
         ld.setCommType(CommunicationKind.receive);
-        ld.setData(messagePayload);
+        ld.setData(message.getMessagePayload());
 		
         this.writeLog(ld);
 	}

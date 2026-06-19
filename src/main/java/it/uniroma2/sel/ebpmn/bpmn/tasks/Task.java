@@ -223,8 +223,8 @@ public class Task extends FlowNode{
 			//schedule the completion event into the engine queue
 			this.receiveEvent(serviceCompleteEvent);
 
-			//Writing the log entry
-			log(t.getTokenId(), t.getTime(), serviceTime);
+			//PB***Writing the log entry
+			//log(t.getTokenId(), t.getTime(), serviceTime);
 
 			//LOG
 			System.out.println(t.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + ": Scheduled SERVICE COMPLETE event for Token ID " + serviceCompleteEvent.getTokenId() + " at time "
@@ -254,8 +254,11 @@ public class Task extends FlowNode{
 		//LOG
 		System.out.println(token.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + ": Token ID " + token.getTokenId() + " Service completed");
 		System.out.println(token.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + ": Resource " + token.getResource().getName() + " is now free");
+
 		//the involved resource is marked as available
 		Resource r = token.getResource();
+		//PB***Writing the log entry
+		log(token.getTokenId(), r.getServiceStartTime(), token.getTime() - r.getServiceStartTime());
 		r.free();
 		r.onServiceCompleted(token.getTime());
 

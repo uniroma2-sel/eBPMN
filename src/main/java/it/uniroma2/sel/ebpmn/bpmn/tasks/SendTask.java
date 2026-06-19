@@ -82,8 +82,8 @@ public class SendTask extends Task{
 			r.onServiceStarted(t, t.getTime(), serviceTime, serviceCompleteEvent, this);
 			this.receiveEvent(serviceCompleteEvent);
 
-			//Writing the log entry
-			log(t.getTokenId(), t.getTime(), serviceTime);
+			//PB****Writing the log entry
+			//log(t.getTokenId(), t.getTime(), serviceTime);
 
 			//LOG
 			System.out.println(t.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName() + ": Scheduled SERVICE COMPLETE event for Token ID " + serviceCompleteEvent.getTokenId() + " at time "
