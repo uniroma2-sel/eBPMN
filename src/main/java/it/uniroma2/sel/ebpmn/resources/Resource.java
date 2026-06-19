@@ -18,7 +18,7 @@ import it.uniroma2.sel.ebpmn.resources.policies.TokenOnFailure;
  * Abstract base class for all eBPMN resource types.
  *
  * <p>A {@code Resource} represents an entity that can execute {@link Task}s within a
- * BPMN process.  It maintains two orthogonal availability flags:
+ * BPMN process. It maintains two orthogonal availability flags:
  * <ul>
  *   <li><em>busy / free</em> — whether the resource is currently serving a token
  *       (managed by {@link #setBusy()} and {@link #free()}).</li>
@@ -27,20 +27,37 @@ import it.uniroma2.sel.ebpmn.resources.policies.TokenOnFailure;
  * </ul>
  * {@link #isAvailable()} returns {@code true} only when both flags are satisfied.
  *
+ * <p>This class is abstract and must not be instantiated directly.
+ * Concrete subclasses are:
+ * <ul>
+ *   <li>{@link Performer} — atomic (leaf) resource with optional MTTF/MTTR
+ *       failure/repair behaviour. Use this for any resource that is directly
+ *       assigned to a {@link Task}, whether or not it has a failure model.</li>
+ *   <li>{@link Subsystem} — series composition: unavailable if ANY child fails.</li>
+ *   <li>{@link Broker} — parallel/redundant composition: unavailable only if ALL
+ *       alternatives fail.</li>
+ * </ul>
+ *
  * <p><strong>Composite design pattern:</strong> {@code Resource} is the Component role.
- * {@link Performer} is the leaf (atomic resource).
- * {@link Subsystem} and {@link Broker} are composites that aggregate children and
- * implement {@link #onChildFailure(Resource)} / {@link #onChildRepair(Resource)} to
- * derive their own availability from the children's state.</p>
+ * {@link Performer} is the Leaf. {@link Subsystem} and {@link Broker} are Composites
+ * that aggregate children and implement {@link #onChildFailure(Resource)} /
+ * {@link #onChildRepair(Resource)} to derive their own availability from the
+ * children's state.
  *
+ * <p><strong>Failure/queue policies</strong> ({@link it.uniroma2.sel.ebpmn.resources.policies.TokenOnFailure},
+ * {@link it.uniroma2.sel.ebpmn.resources.policies.QueueOnFailure}) should be
+ * configured on the resource registered in the {@link Task} — i.e. the root of
+ * the resource hierarchy used by that task. Policies set on child {@link Performer}s
+ * within a composite are ignored.
  *
- * @author Paolo Bocciarelli
+ * @author Paolo Bocciarelli, Andrea D'Ambrogio
  * @version 1.0-SNAPSHOT
  * @see Performer
  * @see Subsystem
  * @see Broker
  */
-public class Resource {
+
+public abstract class Resource {
 
     /** Human-readable name of this resource. */
     private String name;

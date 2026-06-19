@@ -8,6 +8,7 @@ import it.uniroma2.sel.ebpmn.bpmn.tasks.*;
 import it.uniroma2.sel.ebpmn.configuration.SimulationConfig;
 import it.uniroma2.sel.ebpmn.engine.ExecutionEngine;
 import it.uniroma2.sel.ebpmn.logger.CSVLogger;
+import it.uniroma2.sel.ebpmn.resources.Performer;
 import it.uniroma2.sel.ebpmn.resources.Resource;
 import it.uniroma2.sel.ebpmn.generators.ExponentialGenerator;
 import it.uniroma2.sel.ebpmn.generators.NormalGenerator;
@@ -46,17 +47,18 @@ public class Test1_Local {
 			 *
 			 * */
 
-			// ******** Participants *********
+			// ******** Participants and resources*********
 			//initiating pool - distributed simulation must use config file to set the participant name
 			//while in local simulation any name can be used
 			Participant p1 = new Participant("Participant1", true);
+			Participant p2 = new Participant("Participant2",true);
+			//resources
+			Resource r1 = new Performer("Name1", p1);
+			Resource r2 = new Performer("Name2", p1);
+			Resource r3 = new Performer("Name3", p2);
 
 			// ******** Participant 1 *********
-			//resources
-			Resource r1 = new Resource("Name1", "Office1");
-			Resource r2 = new Resource("Name2", "Office2");
-			
-			
+
 			//flow elements
 			double rInterarrivalTime = 5*MIN;
 			Start s = new Start("Start1", p1,
@@ -88,10 +90,6 @@ public class Test1_Local {
 			g1c.addOutGoingEdge(e);
 
 			// ******** Participant 2 *********
-			//resources
-			Resource r3 = new Resource("Name3", "Office3");
-			Participant p2 = new Participant("Participant2",true);
-
 
 			//flow elements
 			double r2InterarrivalTime = 5.0*MIN;

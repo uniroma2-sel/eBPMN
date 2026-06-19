@@ -12,6 +12,7 @@ import it.uniroma2.sel.ebpmn.engine.ExecutionEngine;
 import it.uniroma2.sel.ebpmn.generators.ExponentialGenerator;
 import it.uniroma2.sel.ebpmn.generators.NormalGenerator;
 import it.uniroma2.sel.ebpmn.logger.CSVLogger;
+import it.uniroma2.sel.ebpmn.resources.Performer;
 import it.uniroma2.sel.ebpmn.resources.Resource;
 
 import java.io.IOException;
@@ -46,16 +47,16 @@ public class Test2_FederateB {
 			 *
 			 * */
 
-			// ******** Participants *********
+			// ******** Participants and resources *********
 
 			//initiating pool - distributed simulation must use config file to set the participant name
 			//while any name can be used in local simulations
 
+			Participant p2 = new Participant(config.getFederateName(),true);
+			Resource r3 = new Performer("Office3", p2);
 
 			// ******** Participant 2 *********
-			//resources
-			Resource r3 = new Resource("Name3", "Office3");
-			Participant p2 = new Participant(config.getFederateName(),true);
+
 
 
 			//flow elements
