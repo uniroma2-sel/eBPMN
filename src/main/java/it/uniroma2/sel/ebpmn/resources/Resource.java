@@ -28,7 +28,7 @@ import it.uniroma2.sel.ebpmn.resources.policies.TokenOnFailure;
  * {@link #isAvailable()} returns {@code true} only when both flags are satisfied.
  *
  * <p>This class is abstract and must not be instantiated directly.
- * Concrete subclasses are:
+ * Concrete subclasses are (following composite design pattern):
  * <ul>
  *   <li>{@link Performer} — atomic (leaf) resource with optional MTTF/MTTR
  *       failure/repair behaviour. Use this for any resource that is directly
