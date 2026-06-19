@@ -9,8 +9,6 @@ import it.uniroma2.sel.ebpmn.generators.DeterministicGenerator;
 import it.uniroma2.sel.ebpmn.logger.CSVLogger;
 import it.uniroma2.sel.ebpmn.resources.Broker;
 import it.uniroma2.sel.ebpmn.resources.Performer;
-import it.uniroma2.sel.ebpmn.resources.Subsystem;
-import it.uniroma2.sel.ebpmn.resources.policies.QueueOnFailure;
 import it.uniroma2.sel.ebpmn.resources.policies.StandbyMode;
 import it.uniroma2.sel.ebpmn.resources.policies.TokenOnFailure;
 
