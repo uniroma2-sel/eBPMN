@@ -53,9 +53,9 @@ public class Test1_Local {
 			Participant p1 = new Participant("Participant1", true);
 			Participant p2 = new Participant("Participant2",true);
 			//resources
-			Resource r1 = new Performer("Name1", p1);
-			Resource r2 = new Performer("Name2", p1);
-			Resource r3 = new Performer("Name3", p2);
+			Resource r1 = new Performer("Name1", "role1");
+			Resource r2 = new Performer("Name2", "role2");
+			Resource r3 = new Performer("Name3", "role2");
 
 			// ******** Participant 1 *********
 

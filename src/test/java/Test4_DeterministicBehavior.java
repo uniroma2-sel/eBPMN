@@ -50,31 +50,31 @@ public class Test4_DeterministicBehavior {
         // -----------------------------------------------------------------------
 
         // PickingUnitA — primary pick-and-place arm
-        Performer pickingUnitA = new Performer("PickingUnitA", p1,
+        Performer pickingUnitA = new Performer("PickingUnitA", "role1",
                 new DeterministicGenerator(25),
                 new DeterministicGenerator(20));
 
         // PickingUnitB — backup pick-and-place arm
-        Performer pickingUnitB = new Performer("PickingUnitB", p1,
+        Performer pickingUnitB = new Performer("PickingUnitB", "role1",
                 new DeterministicGenerator(35),
                 new DeterministicGenerator(20));
 
         // ConveyorBelt
-        Performer conveyorBelt = new Performer("ConveyorBelt", p1,
+        Performer conveyorBelt = new Performer("ConveyorBelt", "role2",
                 new DeterministicGenerator(12),
                 new DeterministicGenerator(20));
 
         // -----------------------------------------------------------------------
         // Broker: redundant pick-and-place tool, no switch time
         // -----------------------------------------------------------------------
-        Broker pickTool = new Broker("PickTool", p1, StandbyMode.HOT);
+        Broker pickTool = new Broker("PickTool", "picker", StandbyMode.HOT);
         pickTool.addAlternative(pickingUnitA);
         pickTool.addAlternative(pickingUnitB);
 
         // -----------------------------------------------------------------------
         // Subsystem: feeding station (series composition)
         // -----------------------------------------------------------------------
-        Subsystem feedingStation = new Subsystem("FeedingStation", p1);
+        Subsystem feedingStation = new Subsystem("FeedingStation", "feeder");
         feedingStation.addComponent(pickTool);
         feedingStation.addComponent(conveyorBelt);
         feedingStation.setTokenOnFailure(TokenOnFailure.RESTART);

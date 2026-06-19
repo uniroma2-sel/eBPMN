@@ -49,17 +49,17 @@ public class Test3_ResourceHierarchy {
         // -----------------------------------------------------------------------
 
         // PickingUnitA — primary pick-and-place arm
-        Performer pickingUnitA = new Performer("PickingUnitA", p1,
+        Performer pickingUnitA = new Performer("PickingUnitA", "role1",
                 new LognormalGenerator(5*60, 10),
                 new ExponentialGenerator(1.0 / (3*60)));
 
         // PickingUnitB — backup pick-and-place arm
-        Performer pickingUnitB = new Performer("PickingUnitB", p1,
+        Performer pickingUnitB = new Performer("PickingUnitB", "role1",
                 new LognormalGenerator(7*60, 10),
                 new ExponentialGenerator(1.0 / (3*60)));
 
         // ConveyorBelt
-        Performer conveyorBelt = new Performer("ConveyorBelt", p1,
+        Performer conveyorBelt = new Performer("ConveyorBelt", "role2",
                 new LognormalGenerator(30*60, 60),
                 new ExponentialGenerator(1.0 / (60*10)));
 
@@ -67,7 +67,7 @@ public class Test3_ResourceHierarchy {
         // Broker: redundant pick-and-place tool
         //   Switch time ~ Exponential(lambda=1/30) → E[X] ≈ 30 s
         // -----------------------------------------------------------------------
-        Broker pickTool = new Broker("PickTool", p1, StandbyMode.HOT,
+        Broker pickTool = new Broker("PickTool", "picker", StandbyMode.HOT,
                 new ExponentialGenerator(1.0 / 30));
         pickTool.addAlternative(pickingUnitA);
         pickTool.addAlternative(pickingUnitB);
@@ -75,7 +75,7 @@ public class Test3_ResourceHierarchy {
         // -----------------------------------------------------------------------
         // Subsystem: feeding station (series composition)
         // -----------------------------------------------------------------------
-        Subsystem feedingStation = new Subsystem("FeedingStation", p1);
+        Subsystem feedingStation = new Subsystem("FeedingStation", "feeder");
         feedingStation.addComponent(pickTool);
         feedingStation.addComponent(conveyorBelt);
 

@@ -40,11 +40,11 @@ public class Test8_SendReceive_NoFailure {
         // -----------------------------------------------------------------------
         // Resources — no failure model
         // -----------------------------------------------------------------------
-        Performer rTask1    = new Performer("R_Task1",    pA);
-        Performer rSendTask = new Performer("R_SendTask", pA);
-        Performer rTask2    = new Performer("R_Task2",    pB);
-        Performer rReceive  = new Performer("R_Receive",  pB);
-        Performer rTask3    = new Performer("R_Task3",    pB);
+        Performer rTask1    = new Performer("R_Task1",    "role1");
+        Performer rSendTask = new Performer("R_SendTask", "role2");
+        Performer rTask2    = new Performer("R_Task2",    "role3");
+        Performer rReceive  = new Performer("R_Receive",  "role4");
+        Performer rTask3    = new Performer("R_Task3",    "role5");
 
         // -----------------------------------------------------------------------
         // Process A: Start → Task1 → SendTask → End1

@@ -53,7 +53,7 @@ public class Test2_FederateB {
 			//while any name can be used in local simulations
 
 			Participant p2 = new Participant(config.getFederateName(),true);
-			Resource r3 = new Performer("Office3", p2);
+			Resource r3 = new Performer("Resource2", "role2");
 
 			// ******** Participant 2 *********
 

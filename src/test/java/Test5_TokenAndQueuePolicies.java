@@ -34,7 +34,7 @@ public class Test5_TokenAndQueuePolicies {
         // -----------------------------------------------------------------------
 
         // PickingUnitA — primary pick-and-place arm
-        Performer pickingUnit = new Performer("PickingUnitA", p1,
+        Performer pickingUnit = new Performer("PickingUnitA", "role1",
                new DeterministicGenerator(8),
                new DeterministicGenerator(5));
 

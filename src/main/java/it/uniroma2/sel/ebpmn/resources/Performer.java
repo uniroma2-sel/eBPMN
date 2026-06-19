@@ -25,7 +25,7 @@ import it.uniroma2.sel.ebpmn.resources.policies.TokenOnFailure;
  */
 public class Performer extends Resource {
 
-    private final Participant participant;
+    //private final Participant participant;
     private final RandomVariableGenerator mttfGenerator;
     private final RandomVariableGenerator mttrGenerator;
 
@@ -52,15 +52,14 @@ public class Performer extends Resource {
      * {@link #setTokenOnFailure} / {@link #setQueueOnFailure} if needed.
      *
      * @param name           resource name
-     * @param participant    owning participant (for logical grouping / logging)
+     * @param role           resource log - used for logging purpose
      * @param mttfGenerator  Mean Time To Failure generator (null = no failures)
      * @param mttrGenerator  Mean Time To Repair generator
      */
-    public Performer(String name, Participant participant,
+    public Performer(String name, String role,
                      RandomVariableGenerator mttfGenerator,
                      RandomVariableGenerator mttrGenerator) {
-        super(name, participant.getName());
-        this.participant   = participant;
+        super(name, role);
         this.mttfGenerator = mttfGenerator;
         this.mttrGenerator = mttrGenerator;
         // Schedule first failure immediately from simulation time 0.
@@ -72,8 +71,9 @@ public class Performer extends Resource {
     /**
      * Constructor without failure model (no-failure Performer).
      */
-    public Performer(String name, Participant participant) {
-        this(name, participant, null, null);
+    public Performer(String name, String role) {
+
+        this(name, role, null, null);
     }
 
     // -----------------------------------------------------------------------
@@ -184,7 +184,7 @@ public class Performer extends Resource {
     // Accessors
     // -----------------------------------------------------------------------
 
-    public Participant getParticipant() { return participant; }
+    //public Participant getParticipant() { return participant; }
 
     /** Returns all failure/repair records: each entry is {failureTime, repairTime}.
      *  repairTime is NaN if the performer has not yet been repaired. */

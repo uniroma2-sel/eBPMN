@@ -45,12 +45,12 @@ public class Test6_BrokerPolicy {
         // -----------------------------------------------------------------------
 
         // PickingUnitA — primary pick-and-place arm
-        Performer pickingUnitA = new Performer("PickingUnitA", p1,
+        Performer pickingUnitA = new Performer("PickingUnitA", "role1",
                 new DeterministicGenerator(6),
                 new DeterministicGenerator(3));
 
         // PickingUnitB — backup pick-and-place arm
-        Performer pickingUnitB = new Performer("PickingUnitB", p1,
+        Performer pickingUnitB = new Performer("PickingUnitB", "role1",
                 new DeterministicGenerator(7),
                 new DeterministicGenerator(8));
 
@@ -58,7 +58,7 @@ public class Test6_BrokerPolicy {
         // -----------------------------------------------------------------------
         // Broker: redundant pick-and-place tool, no switch time
         // -----------------------------------------------------------------------
-        Broker pickTool = new Broker("PickTool", p1, StandbyMode.HOT);
+        Broker pickTool = new Broker("PickTool", "picker", StandbyMode.HOT);
         pickTool.addAlternative(pickingUnitA);
         pickTool.addAlternative(pickingUnitB);
         pickTool.setTokenOnFailure(TokenOnFailure.DELAY);

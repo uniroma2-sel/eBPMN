@@ -39,25 +39,25 @@ public class Test9_SendReceive_WithFailure {
         // -----------------------------------------------------------------------
         // Resources — with failure model, KEEP-DELAY policy
         // -----------------------------------------------------------------------
-        Performer rTask1 = new Performer("R_Task1", pA,
+        Performer rTask1 = new Performer("R_Task1", "role1",
                 new DeterministicGenerator(20),
                 new DeterministicGenerator(5));
         rTask1.setTokenOnFailure(TokenOnFailure.DELAY);
         rTask1.setQueueOnFailure(QueueOnFailure.KEEP);
 
-        Performer rSendTask = new Performer("R_SendTask", pA,
+        Performer rSendTask = new Performer("R_SendTask", "role2",
                 new DeterministicGenerator(15),
                 new DeterministicGenerator(4));
         rSendTask.setTokenOnFailure(TokenOnFailure.DELAY);
         rSendTask.setQueueOnFailure(QueueOnFailure.KEEP);
 
-        Performer rReceive = new Performer("R_Receive", pB,
+        Performer rReceive = new Performer("R_Receive", "roleRecv",
                 new DeterministicGenerator(18),
                 new DeterministicGenerator(6));
         rReceive.setTokenOnFailure(TokenOnFailure.DELAY);
         rReceive.setQueueOnFailure(QueueOnFailure.KEEP);
 
-        Performer rTask3 = new Performer("R_Task3", pB,
+        Performer rTask3 = new Performer("R_Task3", "role3",
                 new DeterministicGenerator(25),
                 new DeterministicGenerator(5));
         rTask3.setTokenOnFailure(TokenOnFailure.DELAY);

@@ -53,8 +53,8 @@ public class Test2_FederateA {
 			Participant p1 = new Participant(config.getFederateName(), true);
 
 			//resources
-			Resource r1 = new Performer("Office1", p1);
-			Resource r2 = new Performer("Office2", p1);
+			Resource r1 = new Performer("Resource1", "role1");
+			Resource r2 = new Performer("Resource2", "role1");
 
 			// ******** Participant 1 *********
 

@@ -47,19 +47,19 @@ public class Test7_SubsystemPolicy {
         // -----------------------------------------------------------------------
 
         // PickingUnit — primary pick-and-place arm
-        Performer pickingUnit = new Performer("PickingUnit", p1,
+        Performer pickingUnit = new Performer("PickingUnit", "rolePU",
                 new DeterministicGenerator(6),
                 new DeterministicGenerator(3));
 
         // ConveyorBelt
-        Performer conveyorBelt = new Performer("ConveyorBelt", p1,
+        Performer conveyorBelt = new Performer("ConveyorBelt", "roleCB",
                 new DeterministicGenerator(12),
                 new DeterministicGenerator(20));
 
         // -----------------------------------------------------------------------
         // Subsystem: feeding station (series composition)
         // -----------------------------------------------------------------------
-        Subsystem feedingStation = new Subsystem("FeedingStation", p1);
+        Subsystem feedingStation = new Subsystem("FeedingStation", "feeder");
         feedingStation.addComponent(pickingUnit);
         feedingStation.addComponent(conveyorBelt);
         //feedingStation.setTokenOnFailure(TokenOnFailure.DISCARD);

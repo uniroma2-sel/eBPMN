@@ -57,14 +57,14 @@ public class Broker extends Resource {
      * Full constructor: standby mode + switch time generator.
      *
      * @param name                resource name
-     * @param participant         owning participant (for logical grouping)
+     * @param role                resource log - used for logging purpose
      * @param standbyMode         HOT or COLD standby for non-active alternatives
      * @param switchTimeGenerator distribution of switchover delay; {@code null} = instantaneous
      */
-    public Broker(String name, Participant participant,
+    public Broker(String name, String role,
                   StandbyMode standbyMode,
                   RandomVariableGenerator switchTimeGenerator) {
-        super(name, participant.getName());
+        super(name, role);
         this.standbyMode         = standbyMode;
         this.switchTimeGenerator = switchTimeGenerator;
     }
@@ -73,11 +73,11 @@ public class Broker extends Resource {
      * StandbyMode only, instantaneous switching.
      *
      * @param name        resource name
-     * @param participant owning participant
+     * @param role resource log - used for logging purpose
      * @param standbyMode HOT or COLD standby for non-active alternatives
      */
-    public Broker(String name, Participant participant, StandbyMode standbyMode) {
-        this(name, participant, standbyMode, null);
+    public Broker(String name, String role, StandbyMode standbyMode) {
+        this(name, role, standbyMode, null);
     }
 
     // -----------------------------------------------------------------------
