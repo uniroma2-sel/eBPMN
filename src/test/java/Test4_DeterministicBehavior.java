@@ -50,18 +50,14 @@ public class Test4_DeterministicBehavior {
         // -----------------------------------------------------------------------
 
         // PickingUnitA — primary pick-and-place arm
-        Performer pickingUnitA = new Performer("PickingUnitA", p1); /*,
+        Performer pickingUnitA = new Performer("PickingUnitA", p1,
                 new DeterministicGenerator(25),
-                new DeterministicGenerator(20),
-                TokenOnFailure.DISCARD,
-                QueueOnFailure.FLUSH);*/
+                new DeterministicGenerator(20));
 
         // PickingUnitB — backup pick-and-place arm
-        Performer pickingUnitB = new Performer("PickingUnitB", p1); /*,
+        Performer pickingUnitB = new Performer("PickingUnitB", p1,
                 new DeterministicGenerator(35),
-                new DeterministicGenerator(20),
-                TokenOnFailure.DISCARD,
-                QueueOnFailure.FLUSH);*/
+                new DeterministicGenerator(20));
 
         // ConveyorBelt
         Performer conveyorBelt = new Performer("ConveyorBelt", p1,
@@ -81,8 +77,8 @@ public class Test4_DeterministicBehavior {
         Subsystem feedingStation = new Subsystem("FeedingStation", p1);
         feedingStation.addComponent(pickTool);
         feedingStation.addComponent(conveyorBelt);
-        feedingStation.setTokenOnFailure(TokenOnFailure.DISCARD);
-        feedingStation.setQueueOnFailure(QueueOnFailure.FLUSH);
+        feedingStation.setTokenOnFailure(TokenOnFailure.RESTART);
+        feedingStation.setQueueOnFailure(QueueOnFailure.KEEP);
 
         // -----------------------------------------------------------------------
         // Process flow
