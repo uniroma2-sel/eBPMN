@@ -381,10 +381,9 @@ public class ExecutionEngine {
 
 			for (Participant participant : model.getParticipants()) {
 				End end = (End) participant.getEndNode();
-				int i = 1;
 				for (double[] record : end.getTokenRecords()) {
-					pw.printf("%s;%d;%.3f;%.3f%n",
-							participant.getName(), i++, record[0], record[1]);
+					pw.printf("%s;%.0f;%.3f;%.3f%n",
+							participant.getName(), record[0], record[1], record[2]);
 				}
 			}
 

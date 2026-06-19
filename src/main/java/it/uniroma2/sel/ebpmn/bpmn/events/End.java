@@ -108,7 +108,7 @@ public class End extends FlowNode{
 	public void handleEvent(IncomingToken incomingToken) throws UnexpectedEvent {
 		//compute of the mean service time
 		double serviceTime = incomingToken.getTime()-incomingToken.getStartTimestamp();
-		tokenRecords.add(new double[]{ incomingToken.getTime(), serviceTime });
+		tokenRecords.add(new double[]{Double.parseDouble(incomingToken.getTokenId()), incomingToken.getTime(), serviceTime });
 		avgServiceTime = ((avgServiceTime*processedToken)+serviceTime)/(processedToken+1);
 		processedToken++;
 

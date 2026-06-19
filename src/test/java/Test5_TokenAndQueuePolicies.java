@@ -41,38 +41,11 @@ public class Test5_TokenAndQueuePolicies {
                new DeterministicGenerator(32),
                new DeterministicGenerator(11));
 
-        //pickingUnit.setTokenOnFailure(TokenOnFailure.DISCARD);
-        pickingUnit.setTokenOnFailure(TokenOnFailure.RESTART);
+
+        pickingUnit.setTokenOnFailure(TokenOnFailure.DELAY);
+        pickingUnit.setQueueOnFailure(QueueOnFailure.FLUSH);
 
 
-        // PickingUnitB — backup pick-and-place arm
-        /*Performer pickingUnitB = new Performer("PickingUnitB", p1,
-                new DeterministicGenerator(7),
-                new DeterministicGenerator(8));
-
-        // ConveyorBelt
-        Performer conveyorBelt = new Performer("ConveyorBelt", p1); /*,
-                new DeterministicGenerator(12),
-                new DeterministicGenerator(20),
-                TokenOnFailure.DISCARD,
-                QueueOnFailure.FLUSH);*/
-
-        // -----------------------------------------------------------------------
-        // Broker: redundant pick-and-place tool, no switch time
-        // -----------------------------------------------------------------------
-        /*Broker pickTool = new Broker("PickTool", p1, StandbyMode.HOT);
-        pickTool.addAlternative(pickingUnitA);
-        pickTool.addAlternative(pickingUnitB);
-
-        // -----------------------------------------------------------------------
-        // Subsystem: feeding station (series composition)
-        // -----------------------------------------------------------------------
-        Subsystem feedingStation = new Subsystem("FeedingStation", p1);
-        feedingStation.addComponent(pickTool);
-        feedingStation.addComponent(conveyorBelt);
-        feedingStation.setTokenOnFailure(TokenOnFailure.DISCARD);
-        feedingStation.setQueueOnFailure(QueueOnFailure.FLUSH);
-        */
         // -----------------------------------------------------------------------
         // Process flow
         //   Interarrival: one token every 5 sec

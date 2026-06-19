@@ -29,7 +29,7 @@ import it.uniroma2.sel.ebpmn.resources.policies.TokenOnFailure;
  *
  * Expected console output: multiple "[Broker/Subsystem] failed/repaired" lines.
  */
-public class Test6_BrokerPolicy {
+public class Test7_SubsystemPolicy {
 
     public static void main(String[] args) throws Exception {
 
@@ -56,6 +56,12 @@ public class Test6_BrokerPolicy {
                 new DeterministicGenerator(7),
                 new DeterministicGenerator(8));
 
+        // ConveyorBelt
+        Performer conveyorBelt = new Performer("ConveyorBelt", p1); /*,
+                new DeterministicGenerator(12),
+                new DeterministicGenerator(20),
+                TokenOnFailure.DISCARD,
+                QueueOnFailure.FLUSH);*/
 
         // -----------------------------------------------------------------------
         // Broker: redundant pick-and-place tool, no switch time
@@ -63,7 +69,15 @@ public class Test6_BrokerPolicy {
         Broker pickTool = new Broker("PickTool", p1, StandbyMode.HOT);
         pickTool.addAlternative(pickingUnitA);
         pickTool.addAlternative(pickingUnitB);
-        pickTool.setTokenOnFailure(TokenOnFailure.DISCARD);
+
+        // -----------------------------------------------------------------------
+        // Subsystem: feeding station (series composition)
+        // -----------------------------------------------------------------------
+        Subsystem feedingStation = new Subsystem("FeedingStation", p1);
+        feedingStation.addComponent(pickTool);
+        feedingStation.addComponent(conveyorBelt);
+        feedingStation.setTokenOnFailure(TokenOnFailure.DISCARD);
+        feedingStation.setQueueOnFailure(QueueOnFailure.FLUSH);
 
         // -----------------------------------------------------------------------
         // Process flow
@@ -76,7 +90,7 @@ public class Test6_BrokerPolicy {
 
         Task componentFeeding = new Task("ComponentFeeding", p1,
                 new DeterministicGenerator(5));
-        componentFeeding.addResource(pickTool);
+        componentFeeding.addResource(feedingStation);
 
         End end = new End("End", p1);
 
