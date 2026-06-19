@@ -35,12 +35,12 @@ public class Test5_TokenAndQueuePolicies {
 
         // PickingUnitA — primary pick-and-place arm
         Performer pickingUnit = new Performer("PickingUnitA", p1,
-               new DeterministicGenerator(32),
-               new DeterministicGenerator(11));
+               new DeterministicGenerator(8),
+               new DeterministicGenerator(5));
 
 
         pickingUnit.setTokenOnFailure(TokenOnFailure.DELAY);
-        pickingUnit.setQueueOnFailure(QueueOnFailure.FLUSH);
+        //pickingUnit.setQueueOnFailure(QueueOnFailure.FLUSH);
 
 
         // -----------------------------------------------------------------------
@@ -49,11 +49,11 @@ public class Test5_TokenAndQueuePolicies {
         //   Service time: 1 second
         // -----------------------------------------------------------------------
         Start start = new Start("Start", p1,
-                new DeterministicGenerator(1),
+                new DeterministicGenerator(100),
                 config.getNumberOfTokens());
 
         Task componentFeeding = new Task("ComponentFeeding", p1,
-                new DeterministicGenerator(10));
+                new DeterministicGenerator(30));
         componentFeeding.addResource(pickingUnit);
 
         End end = new End("End", p1);

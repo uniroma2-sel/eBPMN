@@ -302,7 +302,13 @@ public class Resource {
                 System.out.println(now + ") Resource " + getName()
                         + ": DELAY resume — token " + tokenInService.getTokenId()
                         + " completes at " + String.format("%.2f", now + remainingServiceTime));
-                tokenInService = null;
+                //tokenInService = null;
+                /* tokenInService set so that a subsequent failure during the resume period
+                 * can still intercept the token and re-apply the policy correctly.
+                 * tokenInService is cleared only by onServiceCompleted() at actual completion.*/
+
+                pendingCompletion = resumeCompletion;
+
 
                 // Notify only Resource parents — resource is busy with resumed service
                 for (Resource parent : parents) parent.onChildRepair(this);

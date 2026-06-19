@@ -61,7 +61,7 @@ public class Test6_BrokerPolicy {
         Broker pickTool = new Broker("PickTool", p1, StandbyMode.HOT);
         pickTool.addAlternative(pickingUnitA);
         pickTool.addAlternative(pickingUnitB);
-        pickTool.setTokenOnFailure(TokenOnFailure.DISCARD);
+        pickTool.setTokenOnFailure(TokenOnFailure.DELAY);
 
         // -----------------------------------------------------------------------
         // Process flow
@@ -69,11 +69,11 @@ public class Test6_BrokerPolicy {
         //   Service time: 1 second
         // -----------------------------------------------------------------------
         Start start = new Start("Start", p1,
-                new DeterministicGenerator(1),
+                new DeterministicGenerator(100),
                 config.getNumberOfTokens());
 
         Task componentFeeding = new Task("ComponentFeeding", p1,
-                new DeterministicGenerator(5));
+                new DeterministicGenerator(30));
         componentFeeding.addResource(pickTool);
 
         End end = new End("End", p1);

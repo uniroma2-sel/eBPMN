@@ -46,38 +46,24 @@ public class Test7_SubsystemPolicy {
         // Performers (atomic resources with MTTF / MTTR)
         // -----------------------------------------------------------------------
 
-        // PickingUnitA — primary pick-and-place arm
-        Performer pickingUnitA = new Performer("PickingUnitA", p1,
+        // PickingUnit — primary pick-and-place arm
+        Performer pickingUnit = new Performer("PickingUnit", p1,
                 new DeterministicGenerator(6),
                 new DeterministicGenerator(3));
 
-        // PickingUnitB — backup pick-and-place arm
-        Performer pickingUnitB = new Performer("PickingUnitB", p1,
-                new DeterministicGenerator(7),
-                new DeterministicGenerator(8));
-
         // ConveyorBelt
-        Performer conveyorBelt = new Performer("ConveyorBelt", p1); /*,
+        Performer conveyorBelt = new Performer("ConveyorBelt", p1,
                 new DeterministicGenerator(12),
-                new DeterministicGenerator(20),
-                TokenOnFailure.DISCARD,
-                QueueOnFailure.FLUSH);*/
-
-        // -----------------------------------------------------------------------
-        // Broker: redundant pick-and-place tool, no switch time
-        // -----------------------------------------------------------------------
-        Broker pickTool = new Broker("PickTool", p1, StandbyMode.HOT);
-        pickTool.addAlternative(pickingUnitA);
-        pickTool.addAlternative(pickingUnitB);
+                new DeterministicGenerator(20));
 
         // -----------------------------------------------------------------------
         // Subsystem: feeding station (series composition)
         // -----------------------------------------------------------------------
         Subsystem feedingStation = new Subsystem("FeedingStation", p1);
-        feedingStation.addComponent(pickTool);
+        feedingStation.addComponent(pickingUnit);
         feedingStation.addComponent(conveyorBelt);
-        feedingStation.setTokenOnFailure(TokenOnFailure.DISCARD);
-        feedingStation.setQueueOnFailure(QueueOnFailure.FLUSH);
+        //feedingStation.setTokenOnFailure(TokenOnFailure.DISCARD);
+        //feedingStation.setQueueOnFailure(QueueOnFailure.FLUSH);
 
         // -----------------------------------------------------------------------
         // Process flow
