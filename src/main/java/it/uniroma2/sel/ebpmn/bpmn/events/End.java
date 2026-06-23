@@ -114,7 +114,7 @@ public class End extends FlowNode{
 
 		//LOG
 		System.out.println(incomingToken.getTime() + ") " + this.getParticipant().getName() + " - " + this.getName()
-				+ ": Token " + incomingToken.getTokenId() + " execution completed in " + serviceTime);
+				+ ": Token ID " + incomingToken.getTokenId() + " execution completed in " + serviceTime);
 	}
 
 	/**

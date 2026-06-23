@@ -413,8 +413,6 @@ public class Task extends FlowNode{
 	 * @param time current simulation time (failure timestamp)
 	 */
 	public void onResourceFailed(Resource r, double time) {
-		System.out.println(time + ") " + this.getParticipant().getName() + " - " + this.getName()
-				+ ": resource " + r.getName() + " failed — applying TokenOnFailure policy");
 
 		// Apply policy first: cancels pendingCompletion, updates remainingServiceTime.
 		// For RESTART, tokenInService is intentionally left non-null after this call.
