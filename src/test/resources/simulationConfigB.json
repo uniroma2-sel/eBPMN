@@ -1,4 +1,5 @@
 {
+  "outputFolder": "/Users/boccia/IdeaProjects/eBPMNv2/src/test/output/B/",
   "simulationType": "DISTRIBUTED",
   "federationName": "eBPMNFederation",
   "federateName": "ParticipantB",
