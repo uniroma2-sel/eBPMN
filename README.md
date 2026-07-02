@@ -2,7 +2,7 @@
 
 A discrete-event simulation engine for BPMN-based process models, developed at the Systems Engineering Lab, Università di Roma Tor Vergata.
 
-**Authors:** Paolo Bocciarelli, Andrea D'Ambrogio
+**Authors:** Paolo Bocciarelli
 
 ---
 
