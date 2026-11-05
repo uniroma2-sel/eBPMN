@@ -360,9 +360,11 @@ public class HlaAdapterImpl implements HlaAdapter {
             rti.destroyFederationExecution((ExecutionEngine.getInstance()).getFederationName());
             System.out.println("[FederateAmbassador - " +  ambassador.getFederateName() + "] Federation Execution Destroyed");
         } catch (FederatesCurrentlyJoined e) {
-            //ignore
+            System.out.println("[FederateAmbassador - " + ambassador.getFederateName()
+                    + "] Federation Execution not destroyed: other federates still joined");
         } catch (FederationExecutionDoesNotExist e) {
-            throw new RuntimeException(e);
+            System.out.println("[FederateAmbassador - " + ambassador.getFederateName()
+                    + "] Federation Execution already destroyed by another federate");
         } catch (NotConnected e) {
             throw new RuntimeException(e);
         } catch (RTIinternalError e) {

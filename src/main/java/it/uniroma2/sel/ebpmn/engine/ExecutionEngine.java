@@ -309,35 +309,52 @@ public class ExecutionEngine {
 	public void run() throws PastEventException, UnexpectedEvent {
 		System.out.println("[ENGINE] " + config.getSimulationType() + " SIMULATION START ");
 		init();
+
 		double nextEventTimestamp;
 		Event e; //next event to be processed
 		//Simulation main loop
-		while(!eventsList.isEmpty() && simulationTime < config.getSimulationLength()) {
-			nextEventTimestamp = eventsList.getNextEvent().getTime();
-			if(nextEventTimestamp<simulationTime)
-				throw new PastEventException("Past Event: "  + eventsList.getNextEvent().getClass() + " timestamp: " + nextEventTimestamp);
-			//time advance
-			System.out.print("[ENGINE] - Current time: " + simulationTime);
-			if(config.getSimulationType().equals(SimulationConfig.SimulationType.DISTRIBUTED))
-				System.out.print(" RTI Logical Time: " + adapter.queryRTILogicalTime());
-			System.out.println(" advancing to time: " + nextEventTimestamp);
-			timeManager.advanceTo(nextEventTimestamp);
+		while (simulationTime < config.getSimulationLength()) {
+			if (eventsList.isEmpty()) {
+				/*
+				 * No local events. In a distributed simulation, messages from other federates may still arrive:
+				 * the federate requests a time advance up to the simulation length. If a message is received,
+				 * the grant stops at its timestamp and the message is processed in the next iteration.
+				 * Otherwise, the simulation time is set to the simulation length and the loop ends.
+				 * In a local simulation, the time advance is immediate and the loop ends.
+				 */
+				System.out.println("[ENGINE] - Current time: " + simulationTime
+						+ " no local events, waiting for remote messages until: " + config.getSimulationLength());
+				timeManager.advanceTo(config.getSimulationLength());
+				if (eventsList.isEmpty()) {
+					simulationTime = config.getSimulationLength();
+					System.out.println("[ENGINE] - Advanced to time: " + simulationTime);
+				}
+			} else {
+				nextEventTimestamp = eventsList.getNextEvent().getTime();
+				if(nextEventTimestamp<simulationTime)
+					throw new PastEventException("Past Event: "  + eventsList.getNextEvent().getClass() + " timestamp: " + nextEventTimestamp);
+				//time advance
+				System.out.print("[ENGINE] - Current time: " + simulationTime);
+				if(config.getSimulationType().equals(SimulationConfig.SimulationType.DISTRIBUTED))
+					System.out.print(" RTI Logical Time: " + adapter.queryRTILogicalTime());
+				System.out.println(" advancing to time: " + nextEventTimestamp);
+				timeManager.advanceTo(nextEventTimestamp);
 
 
-			/*
-			 * In a distributed simulation, events with timestamps lower than the quested nextEventTimestamp
-			 * might be received (and added at the top of the event queue) while the federate waits for a time advance grant.
-			 * As a result:
-			 *    i)  the granted time advance may be lowe than requested one;
-			 *    ii) the event to be processed (the first element in the queue) must be identified after
-			 *        receiving the time advance grant.
-			 */
-			e = eventsList.getNextEvent();
-			simulationTime = e.getTime();
-			System.out.println("[ENGINE] - Advanced to time: " + simulationTime);
-			simulationTime = e.getTime();
-			eventsList.removeEvent(e);
-			e.processByHandler();	//An event knows its handler entity: FlowNode handlerEntity attribute of Event Class
+				/*
+				 * In a distributed simulation, events with timestamps lower than the quested nextEventTimestamp
+				 * might be received (and added at the top of the event queue) while the federate waits for a time advance grant.
+				 * As a result:
+				 *    i)  the granted time advance may be lowe than requested one;
+				 *    ii) the event to be processed (the first element in the queue) must be identified after
+				 *        receiving the time advance grant.
+				 */
+				e = eventsList.getNextEvent();
+				simulationTime = e.getTime();
+				System.out.println("[ENGINE] - Advanced to time: " + simulationTime);
+				eventsList.removeEvent(e);
+				e.processByHandler();	//An event knows its handler entity: FlowNode handlerEntity attribute of Event Class
+			}
 		}
 
 
