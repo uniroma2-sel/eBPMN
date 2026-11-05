@@ -99,6 +99,7 @@ public abstract class Resource {
     protected double                serviceStartTime     = 0.0;
     protected double                remainingServiceTime = 0.0;
     protected TokenServiceCompleted pendingCompletion    = null;
+    protected Task                  taskInService        = null;
     protected TokenOnFailure        tokenOnFailure       = TokenOnFailure.DELAY;
     protected QueueOnFailure        queueOnFailure       = QueueOnFailure.KEEP;
 
@@ -305,9 +306,8 @@ public abstract class Resource {
             // Resume in-progress service: schedule a new TokenServiceCompleted
             // at repairTime + remainingServiceTime, mark resource busy again.
             double now = ExecutionEngine.getInstance().getSimulationTime();
-            List<Task> ts = new ArrayList<>(tasks);
-            if (!ts.isEmpty()) {
-                Task task = ts.get(0);
+            Task task = taskInService;
+            if (task != null) {
                 setBusy();
                 TokenServiceCompleted resumeCompletion = new TokenServiceCompleted(
                         tokenInService.getTokenId(),
@@ -384,6 +384,7 @@ public abstract class Resource {
         this.serviceStartTime     = startTime;
         this.remainingServiceTime = serviceDuration;
         this.pendingCompletion    = pending;
+        this.taskInService        = handlerTask;
     }
 
     /**
@@ -402,6 +403,7 @@ public abstract class Resource {
         pendingCompletion    = null;
         serviceStartTime     = 0.0;
         remainingServiceTime = 0.0;
+        taskInService        = null;
     }
 
     // -----------------------------------------------------------------------
