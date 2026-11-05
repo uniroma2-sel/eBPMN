@@ -111,6 +111,22 @@ public class SimulationConfig {
 
     public long getSeed() {return seed;}
 
+    /**
+     * Overrides the seed loaded from the configuration file
+     * (e.g., to run independent replications of the same simulation).
+     *
+     * @param seed the seed of the random number generator
+     */
+    public void setSeed(long seed) {this.seed = seed;}
+
+    /**
+     * Overrides the output folder loaded from the configuration file
+     * (e.g., to store the results of each replication in its own folder).
+     *
+     * @param outputFolder the folder where logs and reports are written
+     */
+    public void setOutputFolder(String outputFolder) {this.outputFolder = outputFolder;}
+
     @Override
     public String toString() {
         return String.format("SimulationConfig " +
